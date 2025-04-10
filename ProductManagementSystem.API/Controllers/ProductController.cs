@@ -42,8 +42,8 @@ namespace ProductManagementSystem.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            //if (id < 0)
-            //    return BadRequest("Product ID must be a non-negative integer.");
+            if (id < 0)
+                return BadRequest("Product ID must be a non-negative integer.");
             try
             {
                 var product = await _productService.GetProductByIdAsync(id);
