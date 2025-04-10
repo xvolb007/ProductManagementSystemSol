@@ -1,4 +1,7 @@
 
+using ProductManagmentSystem.Infrastructure.Configuration;
+using ProductManagmentSystem.Infrastructure.DI;
+
 namespace ProductManagementSystem.API
 {
     public class Program
@@ -8,6 +11,8 @@ namespace ProductManagementSystem.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
+            builder.Services.AddProductInfrastructure();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
