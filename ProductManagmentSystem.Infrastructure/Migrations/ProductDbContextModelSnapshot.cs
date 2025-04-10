@@ -23,8 +23,11 @@ namespace ProductManagmentSystem.Infrastructure.Migrations
 
             modelBuilder.Entity("ProductManagmentSystem.Domain.Entities.Product", b =>
                 {
-                    b.Property<double>("Id")
-                        .HasColumnType("float");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)

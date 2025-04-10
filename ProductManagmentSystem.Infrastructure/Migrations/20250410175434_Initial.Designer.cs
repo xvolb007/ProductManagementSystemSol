@@ -11,8 +11,8 @@ using ProductManagmentSystem.Infrastructure.Persistence;
 namespace ProductManagmentSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(ProductDbContext))]
-    [Migration("20250410164746_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250410175434_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,8 +26,11 @@ namespace ProductManagmentSystem.Infrastructure.Migrations
 
             modelBuilder.Entity("ProductManagmentSystem.Domain.Entities.Product", b =>
                 {
-                    b.Property<double>("Id")
-                        .HasColumnType("float");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
