@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ProductManagmentSystem.Application.Interfaces;
+using ProductManagmentSystem.Contracts.DTOs;
 using ProductManagmentSystem.Contracts.DTOs.Product;
 using ProductManagmentSystem.Domain.Entities;
 using ProductManagmentSystem.Domain.RepositoryInterfaces;
@@ -40,6 +41,12 @@ namespace ProductManagmentSystem.Application.Services
             var product = await _productRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"Product with ID {id} not found.");
             product.StockQuantity = stockQuantity;
             await _productRepository.UpdateProductStockAsync(product);
+        }
+        public async Task<PagedResult<ProductDto>> GetPagedProductsAsync(int pageNumber, int pageSize)
+        {
+            var (items, totalCount) = await _productRepository.GetPagedProductsAsync(pageNumber, pageSize);
+            var dtos = _mapper.Map<IEnumerable<ProductDto>>(items);
+            return new PagedResult<ProductDto>(dtos, totalCount, pageNumber, pageSize);
         }
     }
 }

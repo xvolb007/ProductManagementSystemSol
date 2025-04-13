@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ProductManagementSystem.API.Controllers;
 using ProductManagmentSystem.Application.Interfaces;
+using ProductManagmentSystem.Contracts.DTOs;
 using ProductManagmentSystem.Contracts.DTOs.Product;
 
 namespace ProductManagmentSystem.Tests.Controllers
@@ -144,6 +145,110 @@ namespace ProductManagmentSystem.Tests.Controllers
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.Contains("Stock updated", okResult?.Value?.ToString());
+        }
+        [Fact]
+        public async Task GetPaged_ShouldReturnOkResult_WithAllFieldsCorrectlyPopulated()
+        {
+            // Arrange
+            int pageNumber = 2;
+            int pageSize = 5;
+
+            var itemsOnSecondPage = new List<ProductDto>
+            {
+                new ProductDto {
+                    Id = 6,
+                    Name = "Prod6",
+                    ImageUrl = "http://image6",
+                    Price = 60m,
+                    Description = "Description 6",
+                    StockQuantity = 12
+                },
+                new ProductDto {
+                    Id = 7,
+                    Name = "Prod7",
+                    ImageUrl = "http://image7",
+                    Price = 70m,
+                    Description = "Description 7",
+                    StockQuantity = 14
+                },
+                new ProductDto {
+                    Id = 8,
+                    Name = "Prod8",
+                    ImageUrl = "http://image8",
+                    Price = 80m,
+                    Description = "Description 8",
+                    StockQuantity = 16
+                },
+                new ProductDto {
+                    Id = 9,
+                    Name = "Prod9",
+                    ImageUrl = "http://image9",
+                    Price = 90m,
+                    Description = "Description 9",
+                    StockQuantity = 18
+                },
+                new ProductDto {
+                    Id = 10,
+                    Name = "Prod10",
+                    ImageUrl = "http://image10",
+                    Price = 100m,
+                    Description = "Description 10",
+                    StockQuantity = 20
+                }
+            };
+
+            var pagedResult = new PagedResult<ProductDto>(
+                items: itemsOnSecondPage,
+                totalCount: 15,
+                pageNumber: pageNumber,
+                pageSize: pageSize
+            );
+
+            A.CallTo(() => _productServiceFake.GetPagedProductsAsync(pageNumber, pageSize))
+                .Returns(pagedResult);
+
+            // Act
+            var result = await _controller.GetPaged(pageNumber, pageSize);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var actualPaged = Assert.IsType<PagedResult<ProductDto>>(okResult.Value);
+
+            Assert.Equal(15, actualPaged.TotalCount);
+            Assert.Equal(pageNumber, actualPaged.PageNumber);
+            Assert.Equal(pageSize, actualPaged.PageSize);
+            Assert.Equal(5, actualPaged.Items.Count());
+
+            var firstProduct = actualPaged.Items.First();
+            Assert.Equal(6, firstProduct.Id);
+            Assert.Equal("Prod6", firstProduct.Name);
+            Assert.Equal("http://image6", firstProduct.ImageUrl);
+            Assert.Equal(60m, firstProduct.Price);
+            Assert.Equal("Description 6", firstProduct.Description);
+            Assert.Equal(12, firstProduct.StockQuantity);
+
+            var lastProduct = actualPaged.Items.Last();
+            Assert.Equal(10, lastProduct.Id);
+            Assert.Equal("Prod10", lastProduct.Name);
+            Assert.Equal("http://image10", lastProduct.ImageUrl);
+            Assert.Equal(100m, lastProduct.Price);
+            Assert.Equal("Description 10", lastProduct.Description);
+            Assert.Equal(20, lastProduct.StockQuantity);
+        }
+
+        [Fact]
+        public async Task GetPaged_ShouldReturnStatus500_WhenServiceThrowsException()
+        {
+            // Arrange
+            A.CallTo(() => _productServiceFake.GetPagedProductsAsync(A<int>._, A<int>._))
+                .ThrowsAsync(new Exception("Some error occurred during pagination"));
+
+            // Act
+            var result = await _controller.GetPaged(pageNumber: 1, pageSize: 10);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
         }
     }
 }

@@ -8,5 +8,6 @@ namespace ProductManagmentSystem.Domain.RepositoryInterfaces
         Task<Product?> GetByIdAsync(int id);
         Task<Product> AddAsync(Product product);
         Task UpdateProductStockAsync(Product productStockUpdate);
+        Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedProductsAsync(int pageNumber, int pageSize);
     }
 }

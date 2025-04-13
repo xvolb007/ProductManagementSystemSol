@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductManagmentSystem.Application.Interfaces;
+using ProductManagmentSystem.Contracts.DTOs;
 using ProductManagmentSystem.Contracts.DTOs.Product;
 
 namespace ProductManagementSystem.API.Controllers
@@ -95,6 +96,26 @@ namespace ProductManagementSystem.API.Controllers
             {
                 _logger.LogError(ex, $"{nameof(ProductController)} error occurred at {nameof(UpdateStock)}.");
                 return StatusCode(500, "Internal server error while updating stock.");
+            }
+        }
+        /// <summary>
+        /// Retrieves a paginated list of products (default page size is 10).
+        /// </summary>
+        /// <param name="pageNumber">Page number (default: 1)</param>
+        /// <param name="pageSize">Page size (default: 10)</param>
+        /// <returns>A paginated list of product DTOs along with pagination metadata</returns>
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPaged(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                PagedResult<ProductDto> result = await _productService.GetPagedProductsAsync(pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving paginated products");
+                return StatusCode(500, "Internal server error.");
             }
         }
     }

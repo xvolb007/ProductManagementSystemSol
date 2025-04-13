@@ -101,5 +101,33 @@ namespace ProductManagmentSystem.Tests.Repositories
             Assert.Equal("Desc", updatedProduct?.Description);
 
         }
+        [Fact]
+        public async Task GetPagedProductsAsync_ShouldReturnCorrectPageAndTotalCount()
+        {
+            // Arrange
+            var dbName = nameof(GetPagedProductsAsync_ShouldReturnCorrectPageAndTotalCount);
+            using var context = CreateInMemoryContext(dbName);
+            var products = Enumerable.Range(1, 25).Select(i => new Product
+            {
+                Id = i,
+                Name = $"Product {i}",
+                ImageUrl = $"http://image{i}",
+                Price = i * 10,
+                Description = $"Description {i}",
+                StockQuantity = i * 5
+            }).ToList();
+
+            await context.Products.AddRangeAsync(products);
+            await context.SaveChangesAsync();
+
+            var repository = new ProductRepository(context);
+            // Act
+            var (items, totalCount) = await repository.GetPagedProductsAsync(pageNumber: 2, pageSize: 10);
+
+            // Assert
+            Assert.Equal(25, totalCount);
+            Assert.Equal(10, items.Count());
+            Assert.Equal(11, items.First().Id);
+        }
     }
 }

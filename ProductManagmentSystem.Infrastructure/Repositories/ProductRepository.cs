@@ -32,5 +32,15 @@ namespace ProductManagmentSystem.Infrastructure.Repositories
             _productContext.Products.Update(productStockUpdate);
             await _productContext.SaveChangesAsync();
         }
+        public async Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedProductsAsync(int pageNumber, int pageSize)
+        {
+            var totalCount = await _productContext.Products.CountAsync();
+            var items = await _productContext.Products
+                            .OrderBy(p => p.Id)
+                            .Skip((pageNumber - 1) * pageSize)
+                            .Take(pageSize)
+                            .ToListAsync();
+            return (items, totalCount);
+        }
     }
 }

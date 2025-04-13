@@ -149,5 +149,37 @@ namespace ProductManagmentSystem.Tests.Services
             // Act & Assert
             await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.UpdateProductStockAsync(1, stockUpdateDto));
         }
+        [Fact]
+        public async Task GetPagedProductsAsync_ShouldReturnCorrectPagedResult()
+        {
+            // Arrange
+            var products = Enumerable.Range(1, 25).Select(i => new Product
+            {
+                Id = i,
+                Name = $"Product {i}",
+                ImageUrl = $"http://image{i}",
+                Price = i * 10,
+                Description = $"Description {i}",
+                StockQuantity = i * 5
+            }).ToList();
+
+            A.CallTo(() => _productRepositoryFake.GetPagedProductsAsync(A<int>.Ignored, A<int>.Ignored))
+                .ReturnsLazily((int pageNumber, int pageSize) =>
+                {
+                    var ordered = products.OrderBy(p => p.Id);
+                    var pageItems = ordered.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+                    return Task.FromResult<(IEnumerable<Product> Items, int TotalCount)>((pageItems, products.Count));
+                });
+
+            // Act
+            var result = await _service.GetPagedProductsAsync(pageNumber: 3, pageSize: 10);
+
+            // Assert
+            Assert.Equal(25, result.TotalCount);
+            Assert.Equal(3, result.PageNumber);
+            Assert.Equal(10, result.PageSize);
+            Assert.Equal(5, result.Items.Count());
+            Assert.Equal(21, result.Items.First().Id);
+        }
     }
 }

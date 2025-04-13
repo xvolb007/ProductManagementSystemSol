@@ -1,4 +1,5 @@
-﻿using ProductManagmentSystem.Contracts.DTOs.Product;
+﻿using ProductManagmentSystem.Contracts.DTOs;
+using ProductManagmentSystem.Contracts.DTOs.Product;
 
 namespace ProductManagmentSystem.Application.Interfaces
 {
@@ -8,5 +9,6 @@ namespace ProductManagmentSystem.Application.Interfaces
         Task<ProductDto?> GetProductByIdAsync(int id);
         Task<ProductDto> CreateProductAsync(CreateProductDto dto);
         Task UpdateProductStockAsync(int id, int stockQuantity);
+        Task<PagedResult<ProductDto>> GetPagedProductsAsync(int pageNumber, int pageSize);
     }
 }
